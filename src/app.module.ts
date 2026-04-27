@@ -1,31 +1,33 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { PhotoEntity } from './entities/photo.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'root',
-      database: 'orga_structure',
-      entities: [UserEntity, PhotoEntity],
-      synchronize: true,
+    // This line tells NestJS to look for your .env file and make it available everywhere
+    ConfigModule.forRoot({ isGlobal: true }),
+
+    // This block connects to the database using the variables in your .env file
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_NAME'),
+        entities: [UserEntity, PhotoEntity], // We will replace these with PositionEntity soon
+        synchronize: true, // This automatically creates tables in your DB based on your entities
+      }),
     }),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  constructor(private dataSource: DataSource) {
-console.log(dataSource.toString())
-
-  }
-
-}
+export class AppModule {}
