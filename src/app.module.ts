@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserEntity } from './entities/user.entity';
 import { PhotoEntity } from './entities/photo.entity';
+import { PositionsModule } from './positions/positions.module';
 
 @Module({
   imports: [
@@ -26,6 +27,8 @@ import { PhotoEntity } from './entities/photo.entity';
         synchronize: true, // This automatically creates tables in your DB based on your entities
       }),
     }),
+
+    PositionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
