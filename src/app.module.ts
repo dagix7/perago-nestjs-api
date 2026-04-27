@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { UserEntity } from './entities/user.entity';
 import { PhotoEntity } from './entities/photo.entity';
 import { PositionsModule } from './positions/positions.module';
+import { Position } from './positions/entities/position.entity';
 
 @Module({
   imports: [
@@ -23,8 +24,8 @@ import { PositionsModule } from './positions/positions.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [UserEntity, PhotoEntity], // We will replace these with PositionEntity soon
-        synchronize: true, // This automatically creates tables in your DB based on your entities
+        entities: [Position], 
+        synchronize: true, 
       }),
     }),
 
