@@ -1,9 +1,11 @@
-import { IsString, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsNotEmpty, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePositionDto {
   @ApiProperty({ example: 'CTO' })
   @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
   name: string;
 
   @ApiProperty({ example: 'Head of Technology', required: false })

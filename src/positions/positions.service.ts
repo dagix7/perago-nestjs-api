@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TreeRepository, IsNull } from 'typeorm';
 import { Position } from './entities/position.entity';
@@ -46,8 +46,34 @@ export class PositionsService {
     return pos;
   }
 
+  async update(id: string, dto: UpdatePositionDto) {
+    const pos = await this.findOne(id);
+
+    if (dto.parentId !== undefined) {
+      if (dto.parentId === id) throw new BadRequestException('A position cannot be its own parent.');
+      const parent = await this.repo.findOne({ where: { id: dto.parentId } });
+      if (!parent) throw new NotFoundException('Parent position not found');
+      pos.parent = parent;
+    }
+
+    if (dto.name !== undefined) pos.name = dto.name;
+    if (dto.description !== undefined) pos.description = dto.description;
+
+    return this.repo.save(pos);
+  }
+
+  async findChildren(id: string) {
+    const pos = await this.findOne(id);
+    const tree = await this.repo.findDescendantsTree(pos, { depth: 1 });
+    return tree.children;
+  }
+
   async remove(id: string) {
     const pos = await this.findOne(id);
+    const children = await this.repo.findDescendantsTree(pos, { depth: 1 });
+    if (children.children.length > 0) {
+      throw new ConflictException('Cannot delete a position that has children. Reassign or remove children first.');
+    }
     return this.repo.remove(pos);
   }
 }
